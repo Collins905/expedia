@@ -1,46 +1,131 @@
 <?php
-require_once("../models/countries.php");
+header('Content-Type: application/json'); 
+error_reporting(E_ALL); 
+ini_set('display_errors', 1);
 
-header('Content-Type: application/json'); // Always return JSON
+// Database connection
+$servername = "localhost";
+$username   = "root";
+$password   = "";
+$dbname     = "expediaflightbooking";
 
-$country = new country();
+$conn = new mysqli($servername, $username, $password, $dbname);
+if ($conn->connect_error) {
+    echo json_encode(['status' => 'error', 'message' => 'Database connection failed: ' . $conn->connect_error]);
+    exit;
+}
 
-// ✅ Save or update country
+// ----------------- SAVE COUNTRY -----------------
 if (isset($_POST['savecountry'])) {
-    $countryid   = $_POST['countryid'];
-    $countryname = $_POST['countryname'];
-    $response = $country->savecountry($countryid, $countryname);
-    echo json_encode($response);
+    $countryId   = intval($_POST['countryid']);
+    $countryName = trim($_POST['countryname']);
+
+    if ($countryName === '') {
+        echo json_encode(['status' => 'error', 'message' => 'Country name is required']);
+        exit;
+    }
+
+    // Check if country already exists (ignore case, ignore same id if updating)
+    $stmt = $conn->prepare("SELECT countryid FROM countries WHERE LOWER(countryname) = LOWER(?) AND countryid != ?");
+    $stmt->bind_param("si", $countryName, $countryId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows > 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Country already exists']);
+        $stmt->close();
+        $conn->close();
+        exit;
+    }
+    $stmt->close();
+
+    if ($countryId == 0) {
+        // Insert new
+        $stmt = $conn->prepare("INSERT INTO countries (countryname) VALUES (?)");
+        $stmt->bind_param("s", $countryName);
+    } else {
+        // Update existing
+        $stmt = $conn->prepare("UPDATE countries SET countryname = ? WHERE countryid = ?");
+        $stmt->bind_param("si", $countryName, $countryId);
+    }
+
+    if ($stmt->execute()) {
+        echo json_encode(['status' => 'success', 'message' => 'Country saved successfully']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Failed to save: ' . $stmt->error]);
+    }
+    $stmt->close();
+    $conn->close();
     exit;
 }
 
-// ✅ Get all countries
+
+// ----------------- DELETE COUNTRY -----------------
+if (isset($_POST['deletecountry'])) {
+    $id = intval($_POST['countryid']);
+    $stmt = $conn->prepare("DELETE FROM countries WHERE countryid = ?");
+    $stmt->bind_param("i", $id);
+
+    if ($stmt->execute()) {
+        echo json_encode(['status' => 'success', 'message' => 'Country deleted successfully']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Failed to delete: ' . $stmt->error]);
+    }
+    $stmt->close();
+    $conn->close();
+    exit;
+}
+
 if (isset($_GET['getcountries'])) {
-    echo $country->getcountries();
+    $sql = "
+        SELECT c.countryid, 
+               c.countryname,
+               COUNT(DISTINCT ci.cityid) AS cities,
+               COUNT(DISTINCT a.airportid) AS airports,
+               COUNT(DISTINCT al.airlineid) AS airlines
+        FROM countries c
+        LEFT JOIN cities ci ON c.countryid = ci.countryid
+        LEFT JOIN airports a ON ci.cityid = a.cityid
+        LEFT JOIN airlines al ON c.countryid = al.homecountryid
+        GROUP BY c.countryid, c.countryname
+        ORDER BY c.countryname ASC
+    ";
+
+    $result = $conn->query($sql);
+    if (!$result) {
+        echo json_encode(['status' => 'error', 'message' => 'Query failed: ' . $conn->error]);
+        $conn->close();
+        exit;
+    }
+
+    $data = [];
+    while ($row = $result->fetch_assoc()) {
+        $data[] = $row;
+    }
+
+    echo json_encode(['status' => 'success', 'data' => $data]);
+    $conn->close();
     exit;
 }
 
-// ✅ Get single country details
-if (isset($_GET['getcountrydetails'])) {
-    $countryid = $_GET['countryid'];
-    echo $country->getcountrydetails($countryid);
+
+// ----------------- GET SINGLE COUNTRY -----------------
+if (isset($_GET['getcountrydetails']) && isset($_GET['countryid'])) {
+    $id = intval($_GET['countryid']);
+    $stmt = $conn->prepare("SELECT countryid, countryname FROM countries WHERE countryid = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $data = $result->fetch_all(MYSQLI_ASSOC);
+
+    echo json_encode(['status' => 'success', 'data' => $data]);
+    $stmt->close();
+    $conn->close();
     exit;
 }
 
-if (
-    (isset($_POST['deletecountry']) && $_POST['deletecountry'] == "true") ||
-    (isset($_GET['deletecountry']) && $_GET['deletecountry'] == "true")
-) {
-    $countryid = $_POST['countryid'] ?? $_GET['countryid']; // support both POST & GET
-    $response  = $country->deletecountry($countryid);
-
-    echo json_encode($response);
-    exit;
-}
-
-// ✅ Default response if nothing matched
-echo json_encode([
-    "success" => false,
-    "message" => "Invalid request"
-]);
+// ----------------- INVALID REQUEST -----------------
+echo json_encode(['status' => 'error', 'message' => 'Invalid request']);
+$conn->close();
+exit;
 ?>

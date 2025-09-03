@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Flights</title>
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/all.css">
+</head>
+<body>
+<div class="container-fluid mt-4">
+  <h3>Flights</h3>
+  <button class="btn btn-success mb-3" id="addnewflight"><i class="fa fa-plus"></i> Add Flight</button>
+  <table class="table table-sm table-striped table-hover">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Flight Number</th>
+        <th>Airline</th>
+        <th>From</th>
+        <th>To</th>
+        <th>Departure</th>
+        <th>Arrival</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="flightlist"></tbody>
+  </table>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="flightdetailsmodal" tabindex="-1" role="dialog">
+  <div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title">Flight Details</h5>
+      <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="flightid">
+      <div class="form-group"><label>Flight Number</label><input type="text" id="flightnumber" class="form-control"></div>
+      <div class="form-group"><label>Airline</label><select id="airlineid" class="form-control"></select></div>
+      <div class="form-group"><label>From Airport</label><select id="fromairportid" class="form-control"></select></div>
+      <div class="form-group"><label>To Airport</label><select id="toairportid" class="form-control"></select></div>
+      <div class="form-group"><label>Departure</label><input type="datetime-local" id="departuretime" class="form-control"></div>
+      <div class="form-group"><label>Arrival</label><input type="datetime-local" id="arrivaltime" class="form-control"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-success" id="saveflight"><i class="fa fa-save"></i> Save</button>
+      <button class="btn btn-secondary" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
+    </div>
+  </div></div>
+</div>
+
+<script src="js/jquery3.7.1.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/flights.js"></script>
+</body>
+</html>

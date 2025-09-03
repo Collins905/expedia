@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Manage Cities</title>
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <link rel="stylesheet" href="css/all.css">
+</head>
+<body>
+<div class="container-fluid mt-4">
+  <h3>Cities</h3>
+  <button class="btn btn-success mb-3" id="addnewcity"><i class="fa fa-plus"></i> Add City</button>
+  <table class="table table-sm table-striped table-hover">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>City Name</th>
+        <th>Country</th>
+        <th>Airports</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody id="citylist"></tbody>
+  </table>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="citydetailsmodal" tabindex="-1" role="dialog">
+  <div class="modal-dialog"><div class="modal-content">
+    <div class="modal-header">
+      <h5 class="modal-title">City Details</h5>
+      <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
+    </div>
+    <div class="modal-body">
+      <input type="hidden" id="cityid">
+      <div class="form-group">
+        <label>City Name</label>
+        <input type="text" id="cityname" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>Country</label>
+        <select id="countryid" class="form-control"></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-success" id="savecity"><i class="fa fa-save"></i> Save</button>
+      <button class="btn btn-secondary" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
+    </div>
+  </div></div>
+</div>
+
+<script src="js/jquery3.7.1.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script src="js/cities.js"></script>
+</body>
+</html>
