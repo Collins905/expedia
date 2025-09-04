@@ -1,57 +1,122 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Manage Cities</title>
-  <link rel="stylesheet" href="css/bootstrap.min.css">
-  <link rel="stylesheet" href="css/all.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>expedia.com - Cities</title>
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<!-- Your custom script -->
+<script src="public/js/cities.js"></script>
+
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="css/bootstrap.min.css"/>
+  <link rel="stylesheet" href="css/all.css"/> <!-- Font Awesome -->
 </head>
 <body>
-<div class="container-fluid mt-4">
-  <h3>Cities</h3>
-  <button class="btn btn-success mb-3" id="addnewcity"><i class="fa fa-plus"></i> Add City</button>
-  <table class="table table-sm table-striped table-hover">
-    <thead>
-      <tr>
-        <th>#</th>
-        <th>City Name</th>
-        <th>Country</th>
-        <th>Airports</th>
-        <th>Actions</th>
-      </tr>
-    </thead>
-    <tbody id="citylist"></tbody>
-  </table>
-</div>
+  <div class="container-fluid mt-3">
+    <div class="d-flex align-items-center mb-2">
+      <h3 class="me-3 mb-0">Manage Cities</h3>
+      <button id="addnewcity" class="btn btn-success btn-sm">
+        <i class="fas fa-plus"></i> Add New City
+      </button>
+    </div>
 
-<!-- Modal -->
-<div class="modal fade" id="citydetailsmodal" tabindex="-1" role="dialog">
-  <div class="modal-dialog"><div class="modal-content">
-    <div class="modal-header">
-      <h5 class="modal-title">City Details</h5>
-      <button type="button" class="close" data-dismiss="modal"><span>&times;</span></button>
-    </div>
-    <div class="modal-body">
-      <input type="hidden" id="cityid">
-      <div class="form-group">
-        <label>City Name</label>
-        <input type="text" id="cityname" class="form-control">
+    <div class="card mb-3">
+      <div class="card-header">
+        <strong>Filter Options</strong>
       </div>
-      <div class="form-group">
-        <label>Country</label>
-        <select id="countryid" class="form-control"></select>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn btn-success" id="savecity"><i class="fa fa-save"></i> Save</button>
-      <button class="btn btn-secondary" data-dismiss="modal"><i class="fa fa-times"></i> Close</button>
-    </div>
-  </div></div>
-</div>
+      <div class="card-body">
+        <div id="filtercitynotifications" class="mb-3"></div>
 
-<script src="js/jquery3.7.1.js"></script>
-<script src="js/bootstrap.min.js"></script>
-<script src="js/cities.js"></script>
+        <div class="row g-3 align-items-end">
+          <div class="col-md-4">
+            <label for="filtercountry" class="form-label">Country</label>
+            <select id="filtercountry" class="form-select form-select-sm">
+              <option value="">-- All Countries --</option>
+            </select>
+          </div>
+
+          <div class="col-md-4">
+            <label for="filtercityname" class="form-label">City Name</label>
+            <div class="input-group input-group-sm">
+              <input id="filtercityname" type="text" class="form-control" placeholder="Enter city name"/>
+              <button id="searchcities" class="btn btn-success">
+                <i class="fas fa-search"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Cities table -->
+    <div class="card">
+      <div class="card-body p-0">
+        <table class="table table-sm table-striped mb-0">
+          <thead class="table-dark">
+            <tr>
+              <th>#</th>
+              <th>Country</th>
+              <th>City Name</th>
+              <th>Airports</th>
+              <th>Airlines</th>
+              <th style="width: 120px;">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="citiesTableBody"><!-- rows injected by JS --></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- City modal -->
+  <div class="modal fade" id="citydetailsmodal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">City Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body">
+          <div id="citydetailsnotifications" class="mb-3"></div>
+          <input type="hidden" id="cityid" value="0"/>
+
+          <div class="mb-3">
+            <label for="citydetailscountry" class="form-label">Country</label>
+            <select id="citydetailscountry" class="form-select form-select-sm"></select>
+          </div>
+
+          <div class="mb-2">
+            <label for="citydetailscityname" class="form-label">City Name</label>
+            <input id="citydetailscityname" type="text" class="form-control form-control-sm" placeholder="Enter city name"/>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button id="savecity" type="button" class="btn btn-success btn-sm">
+            <i class="fas fa-save"></i> Save changes
+          </button>
+          <button type="button" class="btn btn-outline-danger btn-sm" data-bs-dismiss="modal">
+            <i class="fas fa-times"></i> Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/jquery3.7.1.js"></script>
+  <!-- Use the bundle so Popper is included -->
+  <script src="js/bootstrap.bundle.min.js"></script>
+  <script src="js/cities.js"></script>
 </body>
 </html>

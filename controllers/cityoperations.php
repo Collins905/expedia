@@ -1,16 +1,48 @@
 <?php
+require_once("../models/db.php");
 require_once("../models/cities.php");
-header("Content-Type: application/json");
 
-$city = new city();
+// ✅ Create DB connection
+$db = new db();
+$conn = $db;
 
-if (isset($_POST['savecity'])) {
-    echo json_encode(["success" => $city->savecity($_POST['cityid'] ?? 0, $_POST['cityname'] ?? "", $_POST['countryid'] ?? 0)]);
+// ✅ Create City instance
+$city = new City($conn);
+
+// --- Get cities ---
+if (isset($_GET['getcities'])) {
+    $countryid = !empty($_GET['countryid']) ? intval($_GET['countryid']) : null;
+    $cityname  = !empty($_GET['cityname']) ? trim($_GET['cityname']) : null;
+
+    echo $city->getCities($countryid, $cityname);
     exit;
 }
-if (isset($_GET['getcities'])) { echo $city->getcities(); exit; }
-if (isset($_GET['getcitydetails'])) { echo $city->getcitydetails($_GET['cityid'] ?? 0); exit; }
-if (isset($_POST['deletecity'])) { echo json_encode(["success" => $city->deletecity($_POST['cityid'] ?? 0)]); exit; }
 
-echo json_encode(["error" => "Invalid request"]);
+// --- Get single city details ---
+if (isset($_GET['getcitydetails'])) {
+    $cityid = intval($_GET['cityid']);
+    echo $city->getCityDetails($cityid);
+    exit;
+}
+
+// --- Save city (add/update) ---
+if (isset($_POST['savecity'])) {
+    $cityid    = intval($_POST['cityid']);
+    $cityname  = trim($_POST['cityname']);
+    $countryid = intval($_POST['countryid']);
+
+    echo $city->saveCity($cityid, $cityname, $countryid);
+    exit;
+}
+
+// --- Delete city ---
+if (isset($_POST['deletecity'])) {
+    $cityid = intval($_POST['cityid']);
+    echo $city->deleteCity($cityid);
+    exit;
+}
+
+// --- Default fallback ---
+echo json_encode(["status" => "error", "message" => "Invalid request"]);
+exit;
 ?>
